@@ -44,7 +44,7 @@ fn meter_status(addr: &str, prefix: &str, status: http::StatusCode) -> prometheu
     );
     prometheus::push_metrics(
         "httprom",
-        labels! {"status".to_owned() => status.to_string(),},
+        labels! {"status".to_owned() => status.as_str().to_owned(),},
         addr,
         prometheus::gather(),
         None,
