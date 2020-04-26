@@ -4,7 +4,7 @@ It just makes HTTP requests and meters the results using prometheus push
 ## Usage
 ```bash
 docker run -it --rm \
-    jchorl/httprom:sha-60a7a22 \
+    jchorl/httprom:sha-3542670 \
     -X POST \
     --metrics-prefix mycron \
     --prometheus-push-addr http://prom:9091 \
