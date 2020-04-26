@@ -2,6 +2,7 @@
 extern crate prometheus;
 
 use clap::Clap;
+use http::header::{HeaderMap, HeaderName, HeaderValue};
 use http::Method;
 use std::str::FromStr;
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -10,19 +11,33 @@ use std::time::{SystemTime, UNIX_EPOCH};
 struct Opts {
     #[clap(short = "X", long = "request", default_value = "GET")]
     method: String,
-    input: String,
+    #[clap(short = "H", long = "header", multiple = true)]
+    headers: Vec<String>,
     #[clap(long = "metrics-prefix", required = true)]
     metrics_prefix: String,
     #[clap(long = "prometheus-push-addr", required = true)]
     metrics_addr: String,
+    input: String,
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let opts: Opts = Opts::parse();
 
+    let mut headers = HeaderMap::new();
+    for header in opts.headers {
+        let mut s = header.split(": ");
+        let k = s.next().unwrap();
+        let v = s.next().unwrap();
+        headers.insert(
+            HeaderName::from_str(k).unwrap(),
+            HeaderValue::from_str(v).unwrap(),
+        );
+    }
+
     let resp = reqwest::Client::new()
         .request(Method::from_str(&opts.method).unwrap(), &opts.input)
+        .headers(headers)
         .send()
         .await?;
 
